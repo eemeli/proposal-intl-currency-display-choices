@@ -1,50 +1,67 @@
-# template-for-proposals
+# More Currency Display Choices
 
-A repository template for ECMAScript proposals.
+## Status
 
-## Before creating a proposal
+Champion: Eemeli Aro (Mozilla)  
+Stage: 0
 
-Please ensure the following:
-  1. You have read the [process document](https://tc39.github.io/process-document/)
-  1. You have reviewed the [existing proposals](https://github.com/tc39/proposals/)
-  1. You are aware that your proposal requires being a member of TC39, or locating a TC39 delegate to “champion” your proposal
+## Motivation & Use Cases
 
-## Create your proposal repo
+The Intl.NumberFormat formatter currently supports formatting currency values
+with the following `currencyDisplay` option values:
 
-Follow these steps:
-  1. Click the green [“use this template”](https://github.com/tc39/template-for-proposals/generate) button in the repo header. (Note: Do not fork this repo in GitHub's web interface, as that will later prevent transfer into the TC39 organization)
-  1. Update ecmarkup and the biblio to the latest version: `npm install --save-dev ecmarkup@latest && npm install --save-dev --save-exact @tc39/ecma262-biblio@latest`.
-  1. Go to your repo settings page:
-      1. Under “General”, under “Features”, ensure “Issues” is checked, and disable “Wiki”, and “Projects” (unless you intend to use Projects)
-      1. Under “Pull Requests”, check “Always suggest updating pull request branches” and “automatically delete head branches”
-      1. Under the “Pages” section on the left sidebar, and set the source to “deploy from a branch”, select “gh-pages” in the branch dropdown, and then ensure that “Enforce HTTPS” is checked.
-      1. Under the “Actions” section on the left sidebar, under “General”, select “Read and write permissions” under “Workflow permissions” and click “Save”
-  1. [“How to write a good explainer”][explainer] explains how to make a good first impression.
+- `symbol` (default) — A localized currency symbol such as €.
+- `narrowSymbol` — A narrow format symbol ("$100" rather than "US$100").
+- `code` — The ISO currency code.
+- `name` — A localized currency name such as "dollar".
 
-      > Each TC39 proposal should have a `README.md` file which explains the purpose
-      > of the proposal and its shape at a high level.
-      >
-      > ...
-      >
-      > The rest of this page can be used as a template ...
+These existing options do not support the following use cases:
 
-      Your explainer can point readers to the `index.html` generated from `spec.emu`
-      via markdown like
+- When formatting multiple currencies in the same context (such as a web page),
+  it should be possible to differentiate each currency with its full formal symbol,
+  using e.g. "US$" for USD and "CA$" for CAD.
+  However, it is not possible to format USD as "US$" in the en-US locale,
+  as its `symbol` style always formats as "$".
+  [[Feature request](https://github.com/tc39/ecma402/issues/642)]
 
-      ```markdown
-      You can browse the [ecmarkup output](https://ACCOUNT.github.io/PROJECT/)
-      or browse the [source](https://github.com/ACCOUNT/PROJECT/blob/HEAD/spec.emu).
-      ```
+- When formatting currency values in a very narrow space
+  or in a setting where the currency symbol or name is provided otherwise,
+  it is useful to be able to omit the currency indicator completely
+  while still using the currency formatting style to control the number of fraction digits
+  (which dependens on the currency).
+  The only way to do this now is by formatting to parts,
+  and filtering out the currency symbol or code and any adjoining whitespace from the output.
+  [[Stack Overflow question](https://stackoverflow.com/q/68549027)]
 
-      where *ACCOUNT* and *PROJECT* are the first two path elements in your project's Github URL.
-      For example, for github.com/**tc39**/**template-for-proposals**, *ACCOUNT* is “tc39”
-      and *PROJECT* is “template-for-proposals”.
+## Description
 
+The proposed solution is to add the following two `currencyDisplay` option values:
 
-## Maintain your proposal repo
+- `formalSymbol` — A wider format symbol or the ISO currency code ("US$100" rather than "$100").
+  An alternative spelling for this could be `wideSymbol`.
+- `never` — Do not display any currency symbol or name.
 
-  1. Make your changes to `spec.emu` (ecmarkup uses HTML syntax, but is not HTML, so I strongly suggest not naming it “.html”)
-  1. Any commit that makes meaningful changes to the spec, should run `npm run build` to verify that the build will succeed and the output looks as expected.
-  1. Whenever you update `ecmarkup`, run `npm run build` to verify that the build will succeed and the output looks as expected.
+```js
+const formal = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  currencyDisplay: "formalSymbol",
+});
+formal.format(42); // "US$42.00"
 
-  [explainer]: https://github.com/tc39/how-we-work/blob/HEAD/explainer.md
+const never = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  currencyDisplay: "never",
+});
+never.format(42); // "42.00"
+```
+
+## Comparison
+
+ICU includes
+[FORMAL_SYMBOL_NAME](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4j/com/ibm/icu/util/Currency.html#) /
+[UCURR_FORMAL_SYMBOL_NAME](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/ucurr_8h.html#a881ffe99944d926413324029c9bd577fa493b81f7c7572db858c1d988b22e73e6)
+to provide the same functionality as `formalSymbol`:
+
+> The formal currency symbol is similar to the regular currency symbol, but it always takes the form used in formal settings such as banking; for example, "NT$" instead of "$" for TWD in zh-TW.
