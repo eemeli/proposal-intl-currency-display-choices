@@ -7,13 +7,17 @@ Stage: 0
 
 ## Motivation & Use Cases
 
-The Intl.NumberFormat formatter currently supports formatting currency values
-with the following `currencyDisplay` option values:
+In JavaScript, localized currency formatting is made possible with Intl.NumberFormat
+and its `style: 'currency'` option.
 
-- `symbol` (default) — A localized currency symbol such as €.
-- `narrowSymbol` — A narrow format symbol ("$100" rather than "US$100").
-- `code` — The ISO currency code.
-- `name` — A localized currency name such as "dollar".
+The indication of the currency is controlled by the `currencyDisplay` option,
+which currently supports formatting it as
+a `symbol` (e.g. "\$" or "US$"), a `narrowSymbol` (e.g. "$"),
+an ISO currency `code` (e.g. "USD"), or as a spelled-out `name` (e.g. "US dollars").
+
+For `symbol` formatting, the choice between a "narrow" and "formal" symbol
+is made per currency and per locale,
+so that e.g. USD values are formatted as "\$" with the en-US locale, but as "US$" with the en-CA locale.
 
 These existing options do not support the following use cases:
 
