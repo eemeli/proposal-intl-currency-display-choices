@@ -3,7 +3,7 @@
 ## Status
 
 Champion: Eemeli Aro (Mozilla)  
-Stage: 0
+Stage: 2
 
 ## Motivation & Use Cases
 
