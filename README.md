@@ -2,8 +2,9 @@
 
 ## Status
 
-Champion: Eemeli Aro (Mozilla)  
-Stage: 2
+Champion: [Eemeli Aro](https://github.com/eemeli) (Mozilla)<br>
+Stage: 2<br>
+Reviewers: [Jordan Harband](https://github.com/ljharb), [Nicolò Ribaudo](https://github.com/nicolo-ribaudo)
 
 ## Motivation & Use Cases
 
